@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">
+        <img src="{{ other_user.profile.pic.url }}" alt="Profile" class="avatar">
+        <h2>{{ other_user.username }}</h2>
+    </div>
+
+    <div class="messages-container" id="messages">
+        {% for message in messages %}
+            <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                <p class="message-content">{{ message.content }}</p>
+                <span class="message-time">{{ message.created_at|time }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="message-input">
+        <form id="chat-form">
+            <input type="text" id="message-input" placeholder="Type your message...">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/{{ chat.id }}/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const messagesDiv = document.getElementById('messages');
+        const messageClass = data.username === '{{ request.user.username }}' ? 'sent' : 'received';
+        
+        messagesDiv.innerHTML += `
+            <div class="message ${messageClass}">
+                <p class="message-content">${data.message}</p>
+                <span class="message-time">${new Date().toLocaleTimeString()}</span>
+            </div>
+        `;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    };
+
+    document.querySelector('#chat-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const messageInput = document.querySelector('#message-input');
+        const message = messageInput.value;
+        
+        if (message) {
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInput.value = '';
+        }
+    });
+</script>
+
+<style>
+    .chat-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .chat-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+    }
+
+    .messages-container {
+        height: 500px;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .message {
+        max-width: 70%;
+        padding: 10px 15px;
+        border-radius: 15px;
+        margin: 5px 0;
+    }
+
+    .sent {
+        background-color: #0084ff;
+        color: white;
+        align-self: flex-end;
+    }
+
+    .received {
+        background-color: #e9ecef;
+        align-self: flex-start;
+    }
+
+    .message-time {
+        font-size: 0.8em;
+        opacity: 0.7;
+    }
+
+    .message-input {
+        margin-top: 20px;
+    }
+
+    #chat-form {
+        display: flex;
+        gap: 10px;
+    }
+
+    #message-input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: #0084ff;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

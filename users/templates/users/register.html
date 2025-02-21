@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="register-container">
+    <h2>Join Chat App</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="register-btn">Sign Up</button>
+    </form>
+    <div class="login-link">
+        Already have an account? <a href="{% url 'login' %}">Login</a>
+    </div>
+</div>
+
+<style>
+    .register-container {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-top: 5px;
+    }
+
+    .register-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: #0084ff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}

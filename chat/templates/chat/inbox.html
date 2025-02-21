@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="inbox-container">
+    <h2>Your Conversations</h2>
+    <div class="chat-list">
+        {% for chat in chats %}
+            {% if request.user == chat.user1 %}
+                {% with other_user=chat.user2 %}
+                <a href="{% url 'chat_detail' other_user.id %}" class="chat-item">
+                    <div class="user-info">
+                        <img src="{{ other_user.profile.pic.url }}" alt="Profile" class="avatar">
+                        <h3>{{ other_user.username }}</h3>
+                    </div>
+                    {% with last_message=chat.private_messages.last %}
+                        {% if last_message %}
+                            <p class="last-message">{{ last_message.content|truncatechars:50 }}</p>
+                        {% endif %}
+                    {% endwith %}
+                </a>
+                {% endwith %}
+            {% else %}
+                {% with other_user=chat.user1 %}
+                <a href="{% url 'chat_detail' other_user.id %}" class="chat-item">
+                    <div class="user-info">
+                        <img src="{{ other_user.profile.pic.url }}" alt="Profile" class="avatar">
+                        <h3>{{ other_user.username }}</h3>
+                    </div>
+                    {% with last_message=chat.private_messages.last %}
+                        {% if last_message %}
+                            <p class="last-message">{{ last_message.content|truncatechars:50 }}</p>
+                        {% endif %}
+                    {% endwith %}
+                </a>
+                {% endwith %}
+            {% endif %}
+        {% empty %}
+            <p>No conversations yet</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
